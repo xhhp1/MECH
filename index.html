@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>الشؤون الإدارية</title>
+<style>
+body {
+    font-family: Tahoma, Arial, sans-serif;
+    background: url("https://raw.githubusercontent.com/xhhp1/mechanics/main/images/mechan.png") no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    color: #e0ca51;
+    text-align: center;
+}
+h1 {
+    margin-top: 20px;
+    font-size: 45px;
+    font-weight: bold;
+    color: #e0ca51;
+}
+.button-group-top {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 40px 0;
+    flex-wrap: wrap;
+}
+.button-group-top button {
+    padding: 15px 25px;   /* bigger buttons */
+    font-size: 20px;       /* larger text inside buttons */
+    border-radius: 15px;
+    background: #e0ca51;
+    color: #111;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    text-align: center;
+}
+.button-group-top button:hover {
+    background: #c6b142;
+}
+.container {
+    display: none;
+    background-color: rgba(0,0,0,0.8);
+    padding: 20px;
+    border-radius: 10px;
+    width: 600px;
+    margin: 20px auto;
+}
+label {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 8px 0 4px;
+}
+input, select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 1px solid #e0ca51;
+    background: #2b2b2b;
+    color: #e0ca51;
+    font-size: 14px;
+    font-weight: bold;
+}
+select option {
+    color: #e0ca51;
+    background-color: #2b2b2b;
+    font-weight: bold;
+}
+select:hover, select:focus {
+    background-color: #2b2b2b;
+    color: #e0ca51;
+}
+.generate, .copy-btn {
+    padding: 15px 25px;
+    border-radius: 6px;
+    background: #e0ca51;
+    color: #111;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.generate:hover, .copy-btn:hover {
+    background: #c6b142;
+}
+.output {
+    background: #333;
+    color: #e0ca51;
+    padding: 5px;
+    border-radius: 6px;
+    margin-top: 10px;
+    font-weight: bold;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+</style>
+</head>
+<body>
+
+<h1>الشؤون الإدارية</h1>
+<div class="button-group-top">
+    <button onclick="showForm('internal')">نموذج الإجازات</button>
+    <button onclick="showForm('external')">نموذج الإجازات الخارجية</button>
+    <button onclick="showForm('resignation')">نموذج الاستقالة</button>
+    <button onclick="showForm('absent')">نموذج إستدعاء للفني الذي لم يحضر</button>
+</div>
+
+<!-- نموذج الإجازات الداخلية -->
+<div id="internal" class="container">
+  <h1>نموذج الإجازات</h1>
+  <label>اختر الإجازة لمن:</label>
+  <select id="vacTypeInt">
+    <option value="مشرف">مشرف</option>
+    <option value="فني">فني</option>
+  </select>
+  <label>الكوبي ايدي:</label>
+  <input type="text" id="vacCopyIdInt">
+  <label>مدة الاجازة (بالساعات):</label>
+  <input type="number" id="vacHoursInt">
+  <label>الرصيد المتبقي (بالساعات):</label>
+  <input type="number" id="vacBalanceInt">
+  <label>وقت بدء الإجازة:</label>
+  <div style="display:flex; gap:5px;">
+    <select id="startHourInt"></select>
+    <select id="startMinuteInt"></select>
+    <select id="startPeriodInt">
+      <option value="صباحًا">صباحًا</option>
+      <option value="مساءً">مساءً</option>
+    </select>
+  </div>
+  <div class="button-group">
+    <button class="generate" onclick="generateInternalVacation()">إنشاء النتيجة</button>
+    <button class="copy-btn" onclick="copyResult('vacResultInt')">نسخ</button>
+  </div>
+  <div id="vacResultInt" class="output"></div>
+</div>
+
+<!-- نموذج الإجازات الخارجية -->
+<div id="external" class="container">
+  <h1>نموذج الإجازات الخارجية</h1>
+  <label>اختر الإجازة لمن:</label>
+  <select id="vacTypeExt">
+    <option value="مشرف">مشرف</option>
+    <option value="فني">فني</option>
+  </select>
+  <label>الكوبي ايدي:</label>
+  <input type="text" id="vacCopyIdExt">
+  <label>مدة الاجازة (بالأيام):</label>
+  <input type="number" id="vacDaysExt">
+  <div class="button-group">
+    <button class="generate" onclick="generateExternalVacation()">إنشاء النتيجة</button>
+    <button class="copy-btn" onclick="copyResult('vacResultExt')">نسخ</button>
+  </div>
+  <div id="vacResultExt" class="output"></div>
+</div>
+
+<!-- نموذج الاستقالة -->
+<div id="resignation" class="container">
+  <h1>نموذج الاستقالة</h1>
+  <label>نوع الاستقالة:</label>
+  <select id="resignType" onchange="toggleNumberInput()">
+    <option value="متدرب">رتبة  (متدرب & 1)</option>
+    <option value="اعلى">استقالة من مستوى 2 أو اعلى</option>
+  </select>
+  <label>الكوبي ايدي:</label>
+  <input type="text" id="copyIdResign">
+  <div id="levelNumberContainer" style="display:none;">
+    <label>رقم المستوى:</label>
+    <input type="number" id="levelNumber" placeholder="أدخل رقم المستوى فقط">
+  </div>
+  <div class="button-group">
+    <button class="generate" onclick="generateResignation()">إنشاء الرسالة</button>
+    <button class="copy-btn" onclick="copyResult('resignResult')">نسخ</button>
+  </div>
+  <div id="resignResult" class="output"></div>
+</div>
+
+<!-- نموذج إستدعاء -->
+<div id="absent" class="container">
+  <h1>نموذج إستدعاء للفني الذي لم يحضر</h1>
+  <label>الكوبي ايدي:</label>
+  <input type="number" id="copyIdAbsent">
+  <label>سبب الاستدعاء:</label>
+  <select id="reasonSelect">
+    <option value="">اختر السبب</option>
+    <option>التهرب من المحاسبة</option>
+  <option>التهرب من المحاسبة</option>
+    <option>استخدام خواص الميكانيك للمصلحة الشخصية</option>
+    <option>عدم احترام  الميكانيكي او القيادة او المشرف</option>
+    <option>استقاله برتبة مستوى متدرب او مستوى 1</option>
+    <option>اثاره الجدل بالشات العام او رسائل الميكانيك</option>
+    <option>أي تلاعب بالفواتير</option>
+    <option>استخراج مركبات او استئجار دباب بهدف الحجز</option>
+    <option>الاجرام بوظيف الميكانيك</option>
+    <option>تواجد في مدن اخرا</option>
+    <option>الخروج من غرفة العمليات دون تسليم جميع المهام الميدانية ( الموجه + النائب + الاتصالات)</option>
+    <option>دخول موجه الرقابة والتفتيش</option>
+    <option>السجن الرقابي</option>
+    <option>عدم احترام افراد القطاعات و المواطنين - التهرب من تنبيهات المشرف</option>
+    <option>التصديم المتعمد لغرض تعديل المركبه</option>
+    <option>عدم الجدية بالميدان</option>
+    <option>تخطي مراجع</option>
+    <option>حيازه سلاح او ممنوعات</option>
+    <option>مخالفات التعديل و التزويد</option>
+    <option>نوع المخالفة</option>
+    <option>تعديل و تزويد المركبات التي تملك اكسسوارات أو أكسترا اسلحة</option>
+    <option>فحص او تعديل و تزويد المركبات في خارج اوقات الافتتاح</option>
+    <option>التلاعب في مسارات التعديل و التزويد</option>
+    <option>مخالفة قوانين التعديل و التزويد (تعديل مركبة بدون توجيه)</option>
+    <option>مخالفة قوانين التعديل و التزويد</option>
+    <option>مخالفة قوانين التعديل و التزويد (عدم مراجعة التقرير بعد ارساله )</option>
+    <option>تعديل و تزويد المركبة الخاصه بـ المهندس بنفسه</option>
+    <option>نوع المخالفة</option>
+    <option>الصفع او الضرب</option>
+    <option>الانتداب وقت التوظيف</option>
+    <option>دخول روم الكادر النسائي</option>
+    <option>التدخل في الشؤون الأداريه</option>
+    <option>تعديل الزي الرسمي للقطاع او اضافه الوشوم</option>
+    <option>الاعتراض على الترقية او مخالفة بدون التحقق من اكمال الشروط</option>
+    <option>فتح تكت اجازة غير مطابقة للشروط</option>
+    <option>التاخر في العودة من الاجازة الداخلية</option>
+    <option>تغيير الوظيفة قبل ابتداء الاجازة الداخلية</option>
+    <option>التهرب من استلام مهام الموجه او نائب الموجه او مركز الاتصالات</option>
+    <option>انزال السطحة اثناء القيادة</option>
+    <option>اصلاح المركبات من خلال قائمة F6 ( بإستثناء المركبات الحكومية )</option>
+    <option>ترك البوابات الكراج مفتوحة</option>
+    <option>تخطي مراجع في الراديو</option>
+    <option>القفز من الدرج داخل SRT</option>
+    <option>عدم الاستجابة للاستدعاء من قبل المشرفين خلال 24 ساعة</option>
+    <option>عدم اخذ كود 7 و التأفيك</option>
+    <option>التسطيح داخل حجز لوس دون توجيه</option>
+    <option>التوجه للأماكن المحضوره دون توجيه</option>
+    <option>القيادة المتهورة</option>
+    <option>عدم مطابقة الاسم + الاسم في فايف ام</option>
+    <option>التسطيح داخل نداء الاستغاثة</option>
+    <option>اهمال مركبة</option>
+    <option>عدم الاستجابة على الراديو - عدم تطبيق توجيهات الموجه او النائب</option>
+    <option>عدم الالتزام في قائمة اسعار الكراج</option>
+    <option>اخذ كود 7 و عدم الرجوع بعد الوقت المحدد</option>
+    <option>عدم تسجيل الدخول في الوظيفة</option>
+    <option>البقاء في روم الكراج</option>
+    <option>عدم دخول الموجة</option  </select>
+  <label>قيمة المخالفة:</label>
+  <input type="number" id="penalty" placeholder="أدخل قيمة المخالفة">
+  <label>الإنذار المستحق؟</label>
+  <select id="warningSelect">
+    <option value="">اختر الإنذار</option>
+    <option>اول</option>
+    <option>ثاني</option>
+    <option>ثالث</option>
+  </select>
+  <label>لم تتم مخالفته بسبب:</label>
+  <input type="text" id="notPunished" placeholder="أدخل السبب">
+  <div class="button-group">
+    <button class="generate" onclick="generateAbsentForm()">إنشاء الرسالة</button>
+    <button class="copy-btn" onclick="copyResult('absentResult')">نسخ</button>
+  </div>
+  <div id="absentResult" class="output"></div>
+</div>
+
+<script>
+// وظيفة تبديل النماذج
+function showForm(id){
+    let forms = document.querySelectorAll('.container');
+    forms.forEach(f=>f.style.display='none');
+    document.getElementById(id).style.display='block';
+}
+
+/* ==================== نموذج الإجازات الداخلية ==================== */
+let hourSelect = document.getElementById("startHourInt");
+for(let i=1;i<=12;i++){
+    let val=i<10?"0"+i:i;
+    hourSelect.innerHTML+=`<option value="${val}">${val}</option>`;
+}
+let minuteSelect = document.getElementById("startMinuteInt");
+for(let i=0;i<60;i+=5){
+    let val=i<10?"0"+i:i;
+    minuteSelect.innerHTML+=`<option value="${val}">${val}</option>`;
+}
+function generateInternalVacation(){
+    let vacType = document.getElementById("vacTypeInt").value;
+    let copyId = document.getElementById("vacCopyIdInt").value.trim();
+    let hours = parseInt(document.getElementById("vacHoursInt").value);
+    let balance = parseInt(document.getElementById("vacBalanceInt").value);
+    let startHour = parseInt(document.getElementById("startHourInt").value);
+    let startMinute = parseInt(document.getElementById("startMinuteInt").value);
+    let period = document.getElementById("startPeriodInt").value;
+    if(!copyId||!hours||!balance||!startHour||!startMinute||!period){
+      alert("يرجى ملء جميع الحقول");
+      return;
+    }
+    if(period==="مساءً"&&startHour<12) startHour+=12;
+    if(period==="صباحًا"&&startHour===12) startHour=0;
+    let now = new Date();
+    let tzDate = new Date(now.toLocaleString("en-US",{timeZone:"Asia/Riyadh"}));
+    let yyyy = tzDate.getFullYear();
+    let mm = String(tzDate.getMonth()+1).padStart(2,'0');
+    let dd = String(tzDate.getDate()).padStart(2,'0');
+    let startDate = new Date(`${yyyy}-${mm}-${dd}T${startHour}:${startMinute}:00`);
+    let endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours()+hours);
+    function formatDate(date){
+      let y=date.getFullYear();
+      let m=String(date.getMonth()+1).padStart(2,'0');
+      let d=String(date.getDate()).padStart(2,'0');
+      let h=date.getHours();
+      let min=String(date.getMinutes()).padStart(2,'0');
+      let period=h>=12?"مساءً":"صباحًا";
+      h=h%12;h=h?h:12;
+      return `${y}/${m}/${d}| ${h}:${min} ${period}`;
+    }
+    let headerText = vacType==="فني" ? "***` الفني المحترم :`***" : "***` المشرف المحترم :`***";
+    let result =
+`***\`إجازة داخلية\`***
+
+${headerText} <@${copyId}>
+
+***\`المــــدة :\` ${hours} ساعة***
+***\`الرصيد المتبقي :\` ${balance-hours} ساعة***
+***من تاريخ ${formatDate(startDate)}***
+***الى تاريخ ${formatDate(endDate)}***
+
+***تنتهي اجازتك بنفس التوقيت اللي بترجع فية .***
+
+***\`تنويهات هامة يجب قرائتها :\`***
+***01/ تبدأ الإجازة الخاصة بك في وقتها المحدد، ويُمنع تغيير الوظيفة قبل المدة المحددة لبدء الإجازة.***
+***02/ يجب العودة من الإجازة قبل انتهاء مدتها وتغيير الوظيفة إلى قطاع الميكانيك. من يخالف ذلك سيُعتبر تهرباً وظيفياً وستتم محاسبته من قِبل إدارة الكراج.***
+***03/ في حال عندك عذر وقدمته بفتح تكت اجازة سيتم فقط تصفير اجازاتك مهما كان السبب وعدم اعطائك تهرب وظيفي***
+***04/ في حال تم سجنك رقابيا سيتم تطبيق العقوبه عليك حسب [قوانين الاجازات](https://ptb.discord.com/channels/1071933157097615480/1071934713524133918/1416990256070135900) ***
+***كذلك في حال تعديت نص الاسبوع ( الثلاثاء ) او كان رصيدك اقل من نص اجماليك سيتم تصفيرك الاسبوع الحالي والقادم*** 
+
+@الشؤون الإدارية`;
+    document.getElementById("vacResultInt").innerText=result;
+}
+
+/* ==================== نموذج الإجازات الخارجية ==================== */
+function generateExternalVacation(){
+    let vacType = document.getElementById("vacTypeExt").value;
+    let copyId = document.getElementById("vacCopyIdExt").value.trim();
+    let days = parseInt(document.getElementById("vacDaysExt").value);
+    if(!copyId||!days){
+      alert("يرجى ملء جميع الحقول");
+      return;
+    }
+    let now = new Date();
+    let tzDate = new Date(now.toLocaleString("en-US",{timeZone:"Asia/Riyadh"}));
+    let yyyy = tzDate.getFullYear();
+    let mm = String(tzDate.getMonth()+1).padStart(2,'0');
+    let dd = String(tzDate.getDate()).padStart(2,'0');
+    let startDateStr = `${yyyy}/${mm}/${dd}`;
+    let endDate = new Date(tzDate);
+    endDate.setDate(endDate.getDate() + days);
+    let endY = endDate.getFullYear();
+    let endM = String(endDate.getMonth()+1).padStart(2,'0');
+    let endD = String(endDate.getDate()).padStart(2,'0');
+    let endDateStr = `${endY}/${endM}/${endD}`;
+    let headerText = vacType==="فني" ? "***` الفني المحترم :`***" : "***` المشرف المحترم :`***";
+    let result =
+`***\`  إجازة خارجية  \`***
+
+${headerText} <@${copyId}>
+
+***\`المــــدة :\` ${days} أيام*** 
+
+***من تاريخ ${startDateStr}***
+***الى تاريخ ${endDateStr}***
+
+***\`ملاحظة :\`***
+***تنتهي اجازتك الخارجية في نفس يوم انتهاء الاجازة.***
+
+***\`تنويهات هامة يجب قرائتها :\`***
+***01/ في حال بدت الاجازة يمنع منعا باتا دخولك للمقاطعة. من يخالف ذلك سيُعتبر تهرباً وظيفياً وستتم محاسبته من قِبل إدارة الكراج.***
+***02/ في حال انتهاء الاجازة او اردت قطعها يجب فتح تكت اجازة وطلب قطعها او انهائها ويمنع المباشرة حتى ازالة رول اجازة وظيفية***
+
+<@&1149742928953086105>`;
+    document.getElementById("vacResultExt").innerText=result;
+}
+
+/* ==================== نموذج الاستقالة ==================== */
+function toggleNumberInput() {
+    let type = document.getElementById("resignType").value;
+    let container = document.getElementById("levelNumberContainer");
+    container.style.display = type === "اعلى" ? "block" : "none";
+}
+function generateResignation() {
+    let type = document.getElementById("resignType").value;
+    let copyId = document.getElementById("copyIdResign").value.trim();
+    let levelNumber = document.getElementById("levelNumber").value.trim();
+    if(!copyId){
+        alert("يرجى إدخال الكوبي ايدي");
+        return;
+    }
+    if(type === "اعلى" && !levelNumber){
+        alert("يرجى إدخال رقم المستوى");
+        return;
+    }
+    let result = "";
+    if(type === "متدرب"){
+        result = 
+`*** ▬▬▬ ﷽ ▬▬
+\`\`\`diff
+-الموضوع : قرار انهاء خدمات
+\`\`\`
+\`\`\`cs
+# بعد الاطلاع على نظام التوظيف والترقيات وانهاء الخدمة الصادر من ادارة الكراج قررنا مايلي 
+اولاً: تنهى خدمات الفني ادناه اعتبارا من تاريخه
+ثانياً: منع توظيف 14 يوم
+ثالثاً:غرامه مالية قدرها 1,000,000 تسلم الى خزينة الكراج
+\`\`\`
+<@${copyId}>
+اسم و كود الفني
+\`\`\`وذالك بسبب : استقالة برتبة مستوى (متدرب & 1) \`\`\`
+\`نوع السحب : \` [رقابي ](رابط الدليل) 
+\`اعتماد:\` (منشن لنفسك)
+\`توقيع مدير الخزينة: \`
+<@1182445629721563177> 
+<@&1071933343123386429> 
+يرسل الاصل الى : 
+<@&1149742928953086105> ***`;
+    }
+    else if(type === "اعلى"){
+        result = 
+`*** ▬▬▬ ﷽ ▬▬
+\`\`\`diff
+-الموضوع : قرار انهاء خدمات
+\`\`\`
+\`\`\`cs
+# بعد الاطلاع على نظام التوظيف والترقيات وانهاء الخدمة الصادر من ادارة الكراج قررنا مايلي 
+اولاً: تنهى خدمات الفني ادناه اعتبارا من تاريخه\`\`\`
+<@${copyId}>
+اسمه و كود الفني
+\`\`\`وذالك بسبب : استقالة برتبة مستوى (${levelNumber}) بناءاً على طلبه \`\`\`
+\`توقيع واعتماد:\`
+ (منشن لنفسك)
+\`يرسل الاصل الى : \`
+<@&1149742928953086105> ***`;
+    }
+    document.getElementById("resignResult").innerText = result;
+}
+
+/* ==================== نموذج إستدعاء ==================== */
+function generateAbsentForm(){
+    let copyId = document.getElementById("copyIdAbsent").value.trim();
+    let reason = document.getElementById("reasonSelect").value;
+    let penalty = document.getElementById("penalty").value;
+    let warning = document.getElementById("warningSelect").value;
+    let notPunished = document.getElementById("notPunished").value.trim();
+    if(!copyId || !reason || !penalty || !warning){
+      alert("يرجى ملء جميع الحقول المطلوبة");
+      return;
+    }
+    let resultText = 
+`***\`  نموذج إستدعاء للفني الذي لم يحضر  \`***
+
+***\`اسم الفني\`***  <@${copyId}>
+
+***\`سبب الاستدعاء \`***   ${reason}
+
+***\`قيمة المخالفة\`*** ${Number(penalty).toLocaleString()}
+
+***\` الانذار المستحق ؟ : \`*** ${warning}
+
+***\`لم تتم مخالفته بسبب\`*** ${notPunished}
+
+***الي يجيه الفني يعلمه سبب المخالفة  وينزله المخالفة في روم
+https://ptb.discord.com/channels/1071933157097615480/1071934723858894868 ***
+
+***نسخه الى***
+ <@&1071933357136556183>  - <@&1142626431101325403>`;
+    document.getElementById("absentResult").innerText=resultText;
+}
+
+/* ==================== نسخ النصوص ==================== */
+function copyResult(id){
+    let text=document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text).then(()=>{alert("تم نسخ النص!")});
+}
+</script>
+
+</body>
+</html>
